@@ -30,13 +30,13 @@ const (
 )
 
 type Termios struct {
-	Iflag  uint64
-	Oflag  uint64
-	Cflag  uint64
-	Lflag  uint64
+	Iflag  uint32
+	Oflag  uint32
+	Cflag  uint32
+	Lflag  uint32
 	Cc     [20]byte
-	Ispeed uint64
-	Ospeed uint64
+	Ispeed uint32
+	Ospeed uint32
 }
 
 // MakeRaw put the terminal connected to the given file descriptor into raw
