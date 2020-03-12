@@ -1,6 +1,6 @@
 //+build linux
 
-package term // import "github.com/moby/term"
+package term
 
 import (
 	"io/ioutil"
