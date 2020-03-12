@@ -1,4 +1,4 @@
-package term // import "github.com/docker/docker/pkg/term"
+package term // import "github.com/moby/term"
 
 import (
 	"golang.org/x/sys/unix"
