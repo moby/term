@@ -5,6 +5,7 @@ package term // import "github.com/moby/term"
 import (
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -22,7 +23,11 @@ func RequiresRoot(t *testing.T) {
 
 func newTtyForTest(t *testing.T) (*os.File, error) {
 	RequiresRoot(t)
-	return os.OpenFile("/dev/tty", os.O_RDWR, os.ModeDevice)
+	file, err := os.OpenFile("/dev/tty", os.O_RDWR, os.ModeDevice)
+	if err != nil && strings.Contains(err.Error(), "no such device or address") {
+		t.Skip("terminal missing, skipping test")
+	}
+	return file, err
 }
 
 func newTempFile() (*os.File, error) {
