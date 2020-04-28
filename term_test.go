@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package term
@@ -5,21 +6,23 @@ package term
 import (
 	"io/ioutil"
 	"os"
+	"reflect"
 	"testing"
 
-	"github.com/creack/pty"
-	"github.com/google/go-cmp/cmp"
-	"gotest.tools/v3/assert"
+	cpty "github.com/creack/pty"
 )
 
-func newTtyForTest(t *testing.T) (*os.File, *os.File) {
+func newTTYForTest(t *testing.T) *os.File {
 	t.Helper()
-	pty, tty, err := pty.Open()
+	pty, tty, err := cpty.Open()
 	if err != nil {
 		t.Fatalf("error creating pty: %v", err)
 	}
-
-	return pty, tty
+	t.Cleanup(func() {
+		_ = pty.Close()
+		_ = tty.Close()
+	})
+	return tty
 }
 
 func newTempFile() (*os.File, error) {
@@ -27,88 +30,120 @@ func newTempFile() (*os.File, error) {
 }
 
 func TestGetWinsize(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	winSize, err := GetWinsize(tty.Fd())
-	assert.NilError(t, err)
-	assert.Assert(t, winSize != nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if winSize == nil {
+		t.Fatal("winSize is nil")
+	}
 
 	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
 	err = SetWinsize(tty.Fd(), &newSize)
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	winSize, err = GetWinsize(tty.Fd())
-	assert.NilError(t, err)
-	assert.DeepEqual(t, *winSize, newSize, cmpWinsize)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(*winSize, newSize) {
+		t.Fatalf("expected: %+v, got: %+v", newSize, *winSize)
+	}
 }
 
-var cmpWinsize = cmp.AllowUnexported(Winsize{})
-
 func TestSetWinsize(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	winSize, err := GetWinsize(tty.Fd())
-	assert.NilError(t, err)
-	assert.Assert(t, winSize != nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if winSize == nil {
+		t.Fatal("winSize is nil")
+	}
 	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
 	err = SetWinsize(tty.Fd(), &newSize)
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	winSize, err = GetWinsize(tty.Fd())
-	assert.NilError(t, err)
-	assert.DeepEqual(t, *winSize, newSize, cmpWinsize)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(*winSize, newSize) {
+		t.Fatalf("expected: %+v, got: %+v", newSize, *winSize)
+	}
 }
 
 func TestGetFdInfo(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	inFd, isTerminal := GetFdInfo(tty)
-	assert.Equal(t, inFd, tty.Fd())
-	assert.Equal(t, isTerminal, true)
+	if inFd != tty.Fd() {
+		t.Errorf("expected: %d, got: %d", tty.Fd(), inFd)
+	}
+	if !isTerminal {
+		t.Error("expected isTerminal to be true")
+	}
 	tmpFile, err := newTempFile()
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer tmpFile.Close()
 	inFd, isTerminal = GetFdInfo(tmpFile)
-	assert.Equal(t, inFd, tmpFile.Fd())
-	assert.Equal(t, isTerminal, false)
+	if inFd != tmpFile.Fd() {
+		t.Errorf("expected: %d, got: %d", tty.Fd(), inFd)
+	}
+	if isTerminal {
+		t.Error("expected isTerminal to be false")
+	}
 }
 
 func TestIsTerminal(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	isTerminal := IsTerminal(tty.Fd())
-	assert.Equal(t, isTerminal, true)
+	if !isTerminal {
+		t.Fatalf("expected isTerminal to be true")
+	}
 	tmpFile, err := newTempFile()
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer tmpFile.Close()
 	isTerminal = IsTerminal(tmpFile.Fd())
-	assert.Equal(t, isTerminal, false)
+	if isTerminal {
+		t.Fatalf("expected isTerminal to be false")
+	}
 }
 
 func TestSaveState(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	state, err := SaveState(tty.Fd())
-	assert.NilError(t, err)
-	assert.Assert(t, state != nil)
-	pty, tty = newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	if state == nil {
+		t.Fatal("state is nil")
+	}
+	tty = newTTYForTest(t)
 	err = RestoreTerminal(tty.Fd(), state)
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDisableEcho(t *testing.T) {
-	pty, tty := newTtyForTest(t)
-	defer pty.Close()
-	defer tty.Close()
+	tty := newTTYForTest(t)
 	state, err := SetRawTerminal(tty.Fd())
 	defer RestoreTerminal(tty.Fd(), state)
-	assert.NilError(t, err)
-	assert.Assert(t, state != nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if state == nil {
+		t.Fatal("state is nil")
+	}
 	err = DisableEcho(tty.Fd(), state)
-	assert.NilError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
