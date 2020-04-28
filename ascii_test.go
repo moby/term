@@ -1,25 +1,40 @@
 package term
 
 import (
+	"bytes"
 	"testing"
-
-	"gotest.tools/v3/assert"
-	is "gotest.tools/v3/assert/cmp"
 )
 
 func TestToBytes(t *testing.T) {
 	codes, err := ToBytes("ctrl-a,a")
-	assert.NilError(t, err)
-	assert.Check(t, is.DeepEqual([]byte{1, 97}, codes))
+	if err != nil {
+		t.Error(err)
+	}
+	expected := []byte{1, 97}
+	if !bytes.Equal(codes, expected) {
+		t.Errorf("expected: %+v, got: %+v", expected, codes)
+	}
 
 	_, err = ToBytes("shift-z")
-	assert.Check(t, is.ErrorContains(err, ""))
+	if err == nil {
+		t.Error("expected and error")
+	}
 
 	codes, err = ToBytes("ctrl-@,ctrl-[,~,ctrl-o")
-	assert.NilError(t, err)
-	assert.Check(t, is.DeepEqual([]byte{0, 27, 126, 15}, codes))
+	if err != nil {
+		t.Error(err)
+	}
+	expected = []byte{0, 27, 126, 15}
+	if !bytes.Equal(codes, expected) {
+		t.Errorf("expected: %+v, got: %+v", expected, codes)
+	}
 
 	codes, err = ToBytes("DEL,+")
-	assert.NilError(t, err)
-	assert.Check(t, is.DeepEqual([]byte{127, 43}, codes))
+	if err != nil {
+		t.Error(err)
+	}
+	expected = []byte{127, 43}
+	if !bytes.Equal(codes, expected) {
+		t.Errorf("expected: %+v, got: %+v", expected, codes)
+	}
 }
