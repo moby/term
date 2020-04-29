@@ -1,33 +1,25 @@
-//+build linux
+// +build !windows
 
 package term
 
 import (
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
+	"github.com/creack/pty"
 	"github.com/google/go-cmp/cmp"
 	"gotest.tools/assert"
 )
 
-// RequiresRoot skips tests that require root, unless the test.root flag has
-// been set
-func RequiresRoot(t *testing.T) {
-	if os.Getuid() != 0 {
-		t.Skip("skipping test that requires root")
-		return
+func newTtyForTest(t *testing.T) (*os.File, *os.File) {
+	t.Helper()
+	pty, tty, err := pty.Open()
+	if err != nil {
+		t.Fatalf("error creating pty: %v", err)
 	}
-}
 
-func newTtyForTest(t *testing.T) (*os.File, error) {
-	RequiresRoot(t)
-	file, err := os.OpenFile("/dev/tty", os.O_RDWR, os.ModeDevice)
-	if err != nil && strings.Contains(err.Error(), "no such device or address") {
-		t.Skip("terminal missing, skipping test")
-	}
-	return file, err
+	return pty, tty
 }
 
 func newTempFile() (*os.File, error) {
@@ -35,8 +27,8 @@ func newTempFile() (*os.File, error) {
 }
 
 func TestGetWinsize(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	winSize, err := GetWinsize(tty.Fd())
 	assert.NilError(t, err)
@@ -53,8 +45,8 @@ func TestGetWinsize(t *testing.T) {
 var cmpWinsize = cmp.AllowUnexported(Winsize{})
 
 func TestSetWinsize(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	winSize, err := GetWinsize(tty.Fd())
 	assert.NilError(t, err)
@@ -68,8 +60,8 @@ func TestSetWinsize(t *testing.T) {
 }
 
 func TestGetFdInfo(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	inFd, isTerminal := GetFdInfo(tty)
 	assert.Equal(t, inFd, tty.Fd())
@@ -83,8 +75,8 @@ func TestGetFdInfo(t *testing.T) {
 }
 
 func TestIsTerminal(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	isTerminal := IsTerminal(tty.Fd())
 	assert.Equal(t, isTerminal, true)
@@ -96,22 +88,22 @@ func TestIsTerminal(t *testing.T) {
 }
 
 func TestSaveState(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	state, err := SaveState(tty.Fd())
 	assert.NilError(t, err)
 	assert.Assert(t, state != nil)
-	tty, err = newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty = newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	err = RestoreTerminal(tty.Fd(), state)
 	assert.NilError(t, err)
 }
 
 func TestDisableEcho(t *testing.T) {
-	tty, err := newTtyForTest(t)
-	assert.NilError(t, err)
+	pty, tty := newTtyForTest(t)
+	defer pty.Close()
 	defer tty.Close()
 	state, err := SetRawTerminal(tty.Fd())
 	defer RestoreTerminal(tty.Fd(), state)
