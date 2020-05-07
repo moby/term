@@ -14,6 +14,7 @@ import (
 
 	ansiterm "github.com/Azure/go-ansiterm"
 	"github.com/Azure/go-ansiterm/winterm"
+	"golang.org/x/sys/windows"
 )
 
 const (
@@ -110,16 +111,16 @@ func readInputEvents(ar *ansiReader, maxBytes int) ([]winterm.INPUT_RECORD, erro
 	// Wait for and read input events
 	events := make([]winterm.INPUT_RECORD, countRecords)
 	nEvents := uint32(0)
-	eventsExist, err := winterm.WaitForSingleObject(ar.fd, winterm.WAIT_INFINITE)
+	event, err := windows.WaitForSingleObject(windows.Handle(ar.fd), windows.INFINITE)
 	if err != nil {
 		return nil, err
 	}
+	if event != windows.WAIT_OBJECT_0 {
+		return nil, fmt.Errorf("unexpected wait result: %#x", event)
+	}
 
-	if eventsExist {
-		err = winterm.ReadConsoleInput(ar.fd, events, &nEvents)
-		if err != nil {
-			return nil, err
-		}
+	if err := winterm.ReadConsoleInput(ar.fd, events, &nEvents); err != nil {
+		return nil, err
 	}
 
 	// Return a slice restricted to the number of returned records
