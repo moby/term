@@ -9,7 +9,7 @@ import (
 
 	"github.com/creack/pty"
 	"github.com/google/go-cmp/cmp"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func newTtyForTest(t *testing.T) (*os.File, *os.File) {
