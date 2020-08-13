@@ -30,8 +30,8 @@ type ansiReader struct {
 
 // NewAnsiReader returns an io.ReadCloser that provides VT100 terminal emulation on top of a
 // Windows console input handle.
-func NewAnsiReader(nFile int) io.ReadCloser {
-	file, fd := winterm.GetStdFile(nFile)
+func NewAnsiReader(nFile int64) io.ReadCloser {
+	file, fd := winterm.GetStdFile(int(nFile))
 	return &ansiReader{
 		file:    file,
 		fd:      fd,

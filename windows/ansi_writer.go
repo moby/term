@@ -23,8 +23,8 @@ type ansiWriter struct {
 
 // NewAnsiWriter returns an io.Writer that provides VT100 terminal emulation on top of a
 // Windows console output handle.
-func NewAnsiWriter(nFile int) io.Writer {
-	file, fd := winterm.GetStdFile(nFile)
+func NewAnsiWriter(nFile int64) io.Writer {
+	file, fd := winterm.GetStdFile(int(nFile))
 	info, err := winterm.GetConsoleScreenBufferInfo(fd)
 	if err != nil {
 		return nil
