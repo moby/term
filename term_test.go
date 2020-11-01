@@ -1,9 +1,9 @@
+//go:build !windows
 // +build !windows
 
 package term
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -23,7 +23,7 @@ func newTtyForTest(t *testing.T) (*os.File, *os.File) {
 }
 
 func newTempFile() (*os.File, error) {
-	return ioutil.TempFile(os.TempDir(), "temp")
+	return os.CreateTemp(os.TempDir(), "temp")
 }
 
 func TestGetWinsize(t *testing.T) {
