@@ -3,7 +3,7 @@ module github.com/moby/term
 go 1.13
 
 require (
-	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
+	github.com/Azure/go-ansiterm v0.0.0-20210608035416-43c61cb656b4
 	github.com/creack/pty v1.1.11
 	github.com/google/go-cmp v0.4.0
 	github.com/pkg/errors v0.9.1 // indirect
