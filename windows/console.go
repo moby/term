@@ -8,19 +8,16 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+type fd interface {
+	Fd() uintptr
+}
+
 // GetHandleInfo returns file descriptor and bool indicating whether the file is a console.
 func GetHandleInfo(in interface{}) (uintptr, bool) {
-	switch t := in.(type) {
-	case *ansiReader:
-		return t.Fd(), true
-	case *ansiWriter:
-		return t.Fd(), true
-	}
-
 	var inFd uintptr
 	var isTerminal bool
 
-	if file, ok := in.(*os.File); ok {
+	if file, ok := in.(fd); ok {
 		inFd = file.Fd()
 		isTerminal = isConsole(inFd)
 	}
