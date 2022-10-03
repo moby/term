@@ -6,10 +6,8 @@ package term
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
-	"os/signal"
 
 	"golang.org/x/sys/unix"
 )
@@ -81,7 +79,6 @@ func DisableEcho(fd uintptr, state *State) error {
 	if err := tcset(fd, &newState); err != nil {
 		return err
 	}
-	handleInterrupt(fd, state)
 	return nil
 }
 
@@ -93,7 +90,6 @@ func SetRawTerminal(fd uintptr) (*State, error) {
 	if err != nil {
 		return nil, err
 	}
-	handleInterrupt(fd, oldState)
 	return oldState, err
 }
 
@@ -102,19 +98,4 @@ func SetRawTerminal(fd uintptr) (*State, error) {
 // state. On Windows, it disables LF -> CRLF translation.
 func SetRawTerminalOutput(fd uintptr) (*State, error) {
 	return nil, nil
-}
-
-func handleInterrupt(fd uintptr, state *State) {
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt)
-	go func() {
-		for range sigchan {
-			// quit cleanly and the new terminal item is on a new line
-			fmt.Println()
-			signal.Stop(sigchan)
-			close(sigchan)
-			RestoreTerminal(fd, state)
-			os.Exit(1)
-		}
-	}()
 }
