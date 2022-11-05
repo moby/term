@@ -15,7 +15,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Test
-      run: go test -v ./...
+      run: cd test && go test -v .
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -28,5 +28,10 @@ jobs:
       - name: Lint
         run: |
           docker run --rm -v `pwd`:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
+            golangci/golangci-lint:v1.50.1 golangci-lint run --disable-all -v \
+            -E govet -E misspell -E gofmt -E ineffassign -E revive
+      - name: Lint tests
+        run: |
+          docker run --rm -v `pwd`:/go/src/github.com/moby/term -w /go/src/github.com/moby/term/test \
             golangci/golangci-lint:v1.50.1 golangci-lint run --disable-all -v \
             -E govet -E misspell -E gofmt -E ineffassign -E revive

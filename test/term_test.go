@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package term
+package test
 
 import (
 	"os"
@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	cpty "github.com/creack/pty"
+	. "github.com/moby/term"
 )
 
 func newTTYForTest(t *testing.T) *os.File {
@@ -47,7 +48,7 @@ func TestGetWinsize(t *testing.T) {
 		t.Fatal("winSize is nil")
 	}
 
-	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
+	newSize := Winsize{Width: 200, Height: 200}
 	err = SetWinsize(tty.Fd(), &newSize)
 	if err != nil {
 		t.Fatal(err)
@@ -70,7 +71,7 @@ func TestSetWinsize(t *testing.T) {
 	if winSize == nil {
 		t.Fatal("winSize is nil")
 	}
-	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
+	newSize := Winsize{Width: 200, Height: 200}
 	err = SetWinsize(tty.Fd(), &newSize)
 	if err != nil {
 		t.Fatal(err)

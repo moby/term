@@ -1,8 +1,10 @@
-package term
+package test
 
 import (
 	"bytes"
 	"testing"
+
+	. "github.com/moby/term"
 )
 
 func TestEscapeProxyRead(t *testing.T) {
