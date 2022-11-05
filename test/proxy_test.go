@@ -1,15 +1,17 @@
-package term
+package test
 
 import (
 	"bytes"
 	"testing"
+
+	"github.com/moby/term"
 )
 
 func TestEscapeProxyRead(t *testing.T) {
 	t.Run("no escape keys, keys [a]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("")
-		keys, _ := ToBytes("a")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("")
+		keys, _ := term.ToBytes("a")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -25,9 +27,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("no escape keys, keys [a,b,c]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("")
-		keys, _ := ToBytes("a,b,c")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("")
+		keys, _ := term.ToBytes("a,b,c")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -43,9 +45,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("no escape keys, no keys", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("")
-		keys, _ := ToBytes("")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("")
+		keys, _ := term.ToBytes("")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -64,9 +66,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("DEL escape key, keys [a,b,c,+]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("DEL")
-		keys, _ := ToBytes("a,b,c,+")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("DEL")
+		keys, _ := term.ToBytes("a,b,c,+")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -82,9 +84,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("DEL escape key, no keys", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("DEL")
-		keys, _ := ToBytes("")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("DEL")
+		keys, _ := term.ToBytes("")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -103,9 +105,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-x,ctrl-@ escape key, keys [DEL]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-x,ctrl-@")
-		keys, _ := ToBytes("DEL")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-x,ctrl-@")
+		keys, _ := term.ToBytes("DEL")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -121,9 +123,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-c escape key, keys [ctrl-c]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-c")
-		keys, _ := ToBytes("ctrl-c")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-c")
+		keys, _ := term.ToBytes("ctrl-c")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, len(keys))
 		nr, err := reader.Read(buf)
@@ -139,9 +141,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-c,ctrl-z escape key, keys [ctrl-c],[ctrl-z]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-c,ctrl-z")
-		keys, _ := ToBytes("ctrl-c,ctrl-z")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		keys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 1)
 		nr, err := reader.Read(buf)
@@ -168,9 +170,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-c,ctrl-z escape key, keys [ctrl-c,ctrl-z]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-c,ctrl-z")
-		keys, _ := ToBytes("ctrl-c,ctrl-z")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		keys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 2)
 		nr, err := reader.Read(buf)
@@ -186,9 +188,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-c,ctrl-z escape key, keys [ctrl-c],[DEL,+]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-c,ctrl-z")
-		keys, _ := ToBytes("ctrl-c,DEL,+")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		keys, _ := term.ToBytes("ctrl-c,DEL,+")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 1)
 		nr, err := reader.Read(buf)
@@ -216,9 +218,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-c,ctrl-z escape key, keys [ctrl-c],[DEL]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-c,ctrl-z")
-		keys, _ := ToBytes("ctrl-c,DEL")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-c,ctrl-z")
+		keys, _ := term.ToBytes("ctrl-c,DEL")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 1)
 		nr, err := reader.Read(buf)
@@ -246,9 +248,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("a,b,c,d escape key, keys [a,b],[c,d]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("a,b,c,d")
-		keys, _ := ToBytes("a,b,c,d")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("a,b,c,d")
+		keys, _ := term.ToBytes("a,b,c,d")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 2)
 		nr, err := reader.Read(buf)
@@ -276,9 +278,9 @@ func TestEscapeProxyRead(t *testing.T) {
 	})
 
 	t.Run("ctrl-p,ctrl-q escape key, keys [ctrl-p],[a],[ctrl-p,ctrl-q]", func(t *testing.T) {
-		escapeKeys, _ := ToBytes("ctrl-p,ctrl-q")
-		keys, _ := ToBytes("ctrl-p,a,ctrl-p,ctrl-q")
-		reader := NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
+		escapeKeys, _ := term.ToBytes("ctrl-p,ctrl-q")
+		keys, _ := term.ToBytes("ctrl-p,a,ctrl-p,ctrl-q")
+		reader := term.NewEscapeProxy(bytes.NewReader(keys), escapeKeys)
 
 		buf := make([]byte, 1)
 		nr, err := reader.Read(buf)
