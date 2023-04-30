@@ -47,6 +47,19 @@ func GetFdInfo(in interface{}) (uintptr, bool) {
 	return inFd, isTerminalIn
 }
 
+// GetWinsize returns the window size based on the specified file descriptor.
+func GetWinsize(fd uintptr) (*Winsize, error) {
+	uws, err := unix.IoctlGetWinsize(int(fd), unix.TIOCGWINSZ)
+	ws := &Winsize{Height: uws.Row, Width: uws.Col, x: uws.Xpixel, y: uws.Ypixel}
+	return ws, err
+}
+
+// SetWinsize tries to set the specified window size for the specified file descriptor.
+func SetWinsize(fd uintptr, ws *Winsize) error {
+	uws := &unix.Winsize{Row: ws.Height, Col: ws.Width, Xpixel: ws.x, Ypixel: ws.y}
+	return unix.IoctlSetWinsize(int(fd), unix.TIOCSWINSZ, uws)
+}
+
 // IsTerminal returns true if the given file descriptor is a terminal.
 func IsTerminal(fd uintptr) bool {
 	_, err := tcget(fd)
@@ -99,4 +112,16 @@ func SetRawTerminal(fd uintptr) (*State, error) {
 // state. On Windows, it disables LF -> CRLF translation.
 func SetRawTerminalOutput(fd uintptr) (*State, error) {
 	return nil, nil
+}
+
+func tcget(fd uintptr) (*unix.Termios, error) {
+	p, err := unix.IoctlGetTermios(int(fd), getTermios)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func tcset(fd uintptr, p *unix.Termios) error {
+	return unix.IoctlSetTermios(int(fd), setTermios, p)
 }
