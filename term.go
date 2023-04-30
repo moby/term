@@ -18,7 +18,7 @@ var ErrInvalidState = errors.New("Invalid terminal state")
 
 // State represents the state of the terminal.
 type State struct {
-	termios Termios
+	termios unix.Termios
 }
 
 // Winsize represents the size of the terminal window.
