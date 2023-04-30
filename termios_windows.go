@@ -2,9 +2,7 @@ package term
 
 import "golang.org/x/sys/windows"
 
-// MakeRaw puts the terminal (Windows Console) connected to the given file descriptor into raw
-// mode and returns the previous state of the terminal so that it can be restored.
-func MakeRaw(fd uintptr) (*State, error) {
+func makeRaw(fd uintptr) (*State, error) {
 	state, err := SaveState(fd)
 	if err != nil {
 		return nil, err
