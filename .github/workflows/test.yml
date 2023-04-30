@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         go: ["1.18.x", "1.19.x", "1.20.x"]
-        platform: [ubuntu-latest, macos-latest]
+        platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Install Go ${{ matrix.go }}
