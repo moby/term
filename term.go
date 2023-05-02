@@ -14,6 +14,8 @@ import (
 )
 
 // ErrInvalidState is returned if the state of the terminal is invalid.
+//
+// Deprecated: ErrInvalidState is no longer used.
 var ErrInvalidState = errors.New("Invalid terminal state")
 
 // State represents the state of the terminal.
@@ -55,7 +57,7 @@ func IsTerminal(fd uintptr) bool {
 // to a previous state.
 func RestoreTerminal(fd uintptr, state *State) error {
 	if state == nil {
-		return ErrInvalidState
+		return errors.New("invalid terminal state")
 	}
 	return tcset(fd, &state.termios)
 }
