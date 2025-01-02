@@ -27,6 +27,8 @@ jobs:
           git diff --exit-code
       - name: Lint
         run: |
-          docker run --rm -v `pwd`:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
-            golangci/golangci-lint:v1.50.1 golangci-lint run --disable-all -v \
-            -E govet -E misspell -E gofmt -E ineffassign -E revive
+          docker run --rm -v ./:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
+            golangci/golangci-lint:v1.62.2 golangci-lint run -v \
+            -E gofmt \
+            -E misspell \
+            -E revive
