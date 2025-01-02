@@ -4,29 +4,31 @@ jobs:
   test:
     strategy:
       matrix:
-        go: ["1.18.x", "1.19.x", "1.20.x"]
+        go: ["1.18.x", "1.22.x", "1.23.x"]
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Install Go ${{ matrix.go }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go }}
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Test
       run: go test -v ./...
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: go mod tidy
         run: |
           go mod tidy
           git diff --exit-code
       - name: Lint
         run: |
-          docker run --rm -v `pwd`:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
-            golangci/golangci-lint:v1.50.1 golangci-lint run --disable-all -v \
-            -E govet -E misspell -E gofmt -E ineffassign -E revive
+          docker run --rm -v ./:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
+            golangci/golangci-lint:v1.62.2 golangci-lint run -v \
+            -E gofmt \
+            -E misspell \
+            -E revive
