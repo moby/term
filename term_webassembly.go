@@ -12,7 +12,10 @@ type terminalState struct{}
 
 // GetWinsize returns the window size based on the specified file descriptor.
 func getWinsize(fd uintptr) (*Winsize, error) {
-	return nil, nil
+	window := js.Global().Get("window")
+	width := window.Get("innerWidth").Int()
+	height := window.Get("innerHeight").Int()
+	return &Winsize{width: width, Height: height}, nil
 }
 
 func isTerminal(fd uintptr) bool {
@@ -46,6 +49,10 @@ func getFdInfo(in interface{}) (uintptr, bool) {
 }
 
 func setWinsize(fd uintptr, ws *Winsize) error {
+	window := js.Global().Get("window")
+	window.Set("innerWidth", ws.Width)
+	window.Set("innerHeight", ws.Height)
+
 	return nil
 }
 
