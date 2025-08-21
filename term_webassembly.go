@@ -12,7 +12,7 @@ type terminalState struct{}
 
 // GetWinsize returns the window size based on the specified file descriptor.
 func getWinsize(fd uintptr) (*Winsize, error) {
-	return getWinsize(fd)
+	return nil, nil
 }
 
 func isTerminal(fd uintptr) bool {
