@@ -3,9 +3,12 @@
 
 package term
 
-import "io"
-import "os"
-import "errors"
+import (
+	"errors"
+	"io"
+	"os"
+	"syscall/js"
+)
 
 // terminalState holds the platform-specific state / console mode for the terminal.
 type terminalState struct{}
