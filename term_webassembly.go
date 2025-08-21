@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"syscall/js"
 )
 
 var errUnsupported = errors.New("terminal operations are not supported on js")
@@ -18,40 +19,56 @@ func stdStreams() (stdIn io.ReadCloser, stdOut, stdErr io.Writer) {
 }
 
 func getFdInfo(in any) (uintptr, bool) {
+	var inFd uintptr
+	var isTerminalIn bool
 	if file, ok := in.(*os.File); ok {
-		return file.Fd(), false
+		inFd = file.Fd()
+		isTerminalIn = isTerminal(inFd)
 	}
-	return 0, false
+	return inFd, isTerminalIn
 }
 
 func getWinsize(fd uintptr) (*Winsize, error) {
-	return nil, errUnsupported
+	window := js.Global().Get("window")
+	width := uint16(window.Get("innerWidth").Int())
+	height := uint16(window.Get("innerHeight").Int())
+	return &Winsize{Width: width, Height: height}, nil
 }
 
 func setWinsize(fd uintptr, ws *Winsize) error {
-	return errUnsupported
+	window := js.Global().Get("window")
+	window.Set("innerWidth", ws.Width)
+	window.Set("innerHeight", ws.Height)
+
+	return nil
 }
 
 func isTerminal(fd uintptr) bool {
-	return false
+	return true
 }
 
 func restoreTerminal(fd uintptr, state *State) error {
-	return errUnsupported
+	if state == nil {
+		return errors.New("invalid terminal state")
+	}
+	return nil
 }
 
 func saveState(fd uintptr) (*State, error) {
-	return nil, errUnsupported
+	return &State{}, nil
 }
 
 func disableEcho(fd uintptr, state *State) error {
-	return errUnsupported
+	if state == nil {
+		return errors.New("invalid terminal state")
+	}
+	return nil
 }
 
 func setRawTerminal(fd uintptr) (*State, error) {
-	return nil, errUnsupported
+	return &State{}, nil
 }
 
-func setRawTerminalOutput(uintptr) (*State, error) {
+func setRawTerminalOutput(fd uintptr) (*State, error) {
 	return nil, errUnsupported
 }
