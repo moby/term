@@ -11,11 +11,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// ErrInvalidState is returned if the state of the terminal is invalid.
-//
-// Deprecated: ErrInvalidState is no longer used.
-var ErrInvalidState = errors.New("Invalid terminal state")
-
 // terminalState holds the platform-specific state / console mode for the terminal.
 type terminalState struct {
 	termios unix.Termios
