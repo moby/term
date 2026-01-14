@@ -19,7 +19,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go: ["1.18.x", "1.22.x", "1.23.x"]
+        go: ["1.18.x", "oldstable", "stable"]
         platform: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
