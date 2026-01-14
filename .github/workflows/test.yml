@@ -43,7 +43,4 @@ jobs:
       - name: Lint
         run: |
           docker run --rm -v ./:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
-            golangci/golangci-lint:v1.62.2 golangci-lint run -v \
-            -E gofmt \
-            -E misspell \
-            -E revive
+            golangci/golangci-lint:v2.8-alpine golangci-lint run -v
