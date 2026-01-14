@@ -56,7 +56,7 @@ next:
 			if key == "DEL" {
 				codes = append(codes, 127)
 			} else {
-				return nil, fmt.Errorf("Unknown character: '%s'", key)
+				return nil, fmt.Errorf("unknown character: '%s'", key)
 			}
 		} else {
 			codes = append(codes, key[0])
