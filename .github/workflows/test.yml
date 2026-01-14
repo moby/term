@@ -28,14 +28,14 @@ jobs:
       with:
         go-version: ${{ matrix.go }}
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Test
       run: go test -v ./...
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: go mod tidy
         run: |
           go mod tidy
