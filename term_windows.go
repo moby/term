@@ -1,7 +1,7 @@
 package term
 
 import (
-	"fmt"
+	"errors"
 	"io"
 	"os"
 	"os/signal"
@@ -94,16 +94,14 @@ func getWinsize(fd uintptr) (*Winsize, error) {
 		return nil, err
 	}
 
-	winsize := &Winsize{
+	return &Winsize{
 		Width:  uint16(info.Window.Right - info.Window.Left + 1),
 		Height: uint16(info.Window.Bottom - info.Window.Top + 1),
-	}
-
-	return winsize, nil
+	}, nil
 }
 
 func setWinsize(fd uintptr, ws *Winsize) error {
-	return fmt.Errorf("not implemented on Windows")
+	return errors.New("not implemented on Windows")
 }
 
 func isTerminal(fd uintptr) bool {
