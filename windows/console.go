@@ -16,16 +16,12 @@ func GetHandleInfo(in interface{}) (uintptr, bool) {
 		return t.Fd(), true
 	case *ansiWriter:
 		return t.Fd(), true
+	case *os.File:
+		fd := t.Fd()
+		return fd, isConsole(fd)
+	default:
+		return 0, false
 	}
-
-	var inFd uintptr
-	var isTerminal bool
-
-	if file, ok := in.(*os.File); ok {
-		inFd = file.Fd()
-		isTerminal = isConsole(inFd)
-	}
-	return inFd, isTerminal
 }
 
 // IsConsole returns true if the given file descriptor is a Windows Console.
