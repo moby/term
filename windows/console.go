@@ -28,14 +28,6 @@ func GetHandleInfo(in interface{}) (uintptr, bool) {
 	return inFd, isTerminal
 }
 
-// IsConsole returns true if the given file descriptor is a Windows Console.
-// The code assumes that GetConsoleMode will return an error for file descriptors that are not a console.
-//
-// Deprecated: use [windows.GetConsoleMode] or [golang.org/x/term.IsTerminal].
-func IsConsole(fd uintptr) bool {
-	return isConsole(fd)
-}
-
 func isConsole(fd uintptr) bool {
 	var mode uint32
 	err := windows.GetConsoleMode(windows.Handle(fd), &mode)
