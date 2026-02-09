@@ -7,11 +7,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Termios is the Unix API for terminal I/O.
-//
-// Deprecated: use [unix.Termios].
-type Termios = unix.Termios
-
 func makeRaw(fd uintptr) (*State, error) {
 	termios, err := tcget(fd)
 	if err != nil {
