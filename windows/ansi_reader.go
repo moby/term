@@ -166,9 +166,10 @@ var keyMapPrefix = map[uint16]string{
 // translateKeyEvents converts the input events into the appropriate ANSI string.
 func translateKeyEvents(events []winterm.INPUT_RECORD, escapeSequence []byte) []byte {
 	var buffer bytes.Buffer
-	for _, event := range events {
+	for i := range events {
+		event := events[i]
 		if event.EventType == winterm.KEY_EVENT && event.KeyEvent.KeyDown != 0 {
-			buffer.WriteString(keyToString(&event.KeyEvent, escapeSequence))
+			buffer.WriteString(keyToString(&events[i].KeyEvent, escapeSequence))
 		}
 	}
 
