@@ -46,5 +46,7 @@ jobs:
           git diff --exit-code
       - name: Lint
         run: |
-          docker run --rm -v ./:/go/src/github.com/moby/term -w /go/src/github.com/moby/term \
-            golangci/golangci-lint:v2.8-alpine golangci-lint run -v
+          docker run --rm \
+            -v ./:/go/src/github.com/moby/term \
+            -w /go/src/github.com/moby/term \
+            golangci/golangci-lint:v2.11-alpine golangci-lint run -v
