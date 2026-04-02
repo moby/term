@@ -167,7 +167,7 @@ func restoreAtInterrupt(fd uintptr, state *State) {
 	signal.Notify(sigchan, os.Interrupt)
 
 	go func() {
-		_ = <-sigchan
+		<-sigchan
 		_ = RestoreTerminal(fd, state)
 		os.Exit(0)
 	}()
