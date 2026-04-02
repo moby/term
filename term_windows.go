@@ -3,6 +3,7 @@ package term
 import (
 	"errors"
 	"io"
+	"math"
 	"os"
 	"os/signal"
 
@@ -94,9 +95,15 @@ func getWinsize(fd uintptr) (*Winsize, error) {
 		return nil, err
 	}
 
+	w := int32(info.Window.Right) - int32(info.Window.Left) + 1
+	h := int32(info.Window.Bottom) - int32(info.Window.Top) + 1
+	if w < 0 || w > math.MaxUint16 || h < 0 || h > math.MaxUint16 {
+		return nil, errors.New("invalid console window size")
+	}
+
 	return &Winsize{
-		Width:  uint16(info.Window.Right - info.Window.Left + 1),
-		Height: uint16(info.Window.Bottom - info.Window.Top + 1),
+		Width:  uint16(w),
+		Height: uint16(h),
 	}, nil
 }
 
