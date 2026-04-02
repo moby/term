@@ -29,6 +29,8 @@ jobs:
         go-version: ${{ matrix.go }}
     - name: Checkout code
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Test
       run: go test -v ./...
   lint:
@@ -36,6 +38,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: go mod tidy
         run: |
           go mod tidy
