@@ -98,11 +98,8 @@ func (ar *ansiReader) Read(p []byte) (int, error) {
 
 // readInputEvents polls until at least one event is available.
 func readInputEvents(ar *ansiReader, maxBytes int) ([]winterm.INPUT_RECORD, error) {
-	// Determine the maximum number of records to retrieve
-	// -- Cast around the type system to obtain the size of a single INPUT_RECORD.
-	//    unsafe.Sizeof requires an expression vs. a type-reference; the casting
-	//    tricks the type system into believing it has such an expression.
-	recordSize := int(unsafe.Sizeof(*((*winterm.INPUT_RECORD)(unsafe.Pointer(&maxBytes)))))
+	// Determine the size of a single INPUT_RECORD.
+	recordSize := int(unsafe.Sizeof(winterm.INPUT_RECORD{}))
 	countRecords := maxBytes / recordSize
 	if countRecords > ansiterm.MAX_INPUT_EVENTS {
 		countRecords = ansiterm.MAX_INPUT_EVENTS
