@@ -218,9 +218,9 @@ func formatVirtualKey(key uint16, controlState uint32, escapeSequence []byte) st
 
 // getControlKeys extracts the shift, alt, and ctrl key states.
 func getControlKeys(controlState uint32) (shift, alt, control bool) {
-	shift = 0 != (controlState & winterm.SHIFT_PRESSED)
-	alt = 0 != (controlState & (winterm.LEFT_ALT_PRESSED | winterm.RIGHT_ALT_PRESSED))
-	control = 0 != (controlState & (winterm.LEFT_CTRL_PRESSED | winterm.RIGHT_CTRL_PRESSED))
+	shift = controlState&winterm.SHIFT_PRESSED != 0
+	alt = controlState&(winterm.LEFT_ALT_PRESSED|winterm.RIGHT_ALT_PRESSED) != 0
+	control = controlState&(winterm.LEFT_CTRL_PRESSED|winterm.RIGHT_CTRL_PRESSED) != 0
 	return shift, alt, control
 }
 
