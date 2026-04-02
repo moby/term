@@ -100,7 +100,7 @@ func getWinsize(fd uintptr) (*Winsize, error) {
 	}, nil
 }
 
-func setWinsize(fd uintptr, ws *Winsize) error {
+func setWinsize(uintptr, *Winsize) error {
 	return errors.New("not implemented on Windows")
 }
 

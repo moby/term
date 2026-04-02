@@ -18,7 +18,6 @@ type ansiWriter struct {
 	infoReset      *winterm.CONSOLE_SCREEN_BUFFER_INFO
 	command        []byte
 	escapeSequence []byte
-	inAnsiSequence bool
 	parser         *ansiterm.AnsiParser
 }
 

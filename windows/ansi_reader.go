@@ -22,11 +22,10 @@ const (
 
 // ansiReader wraps a standard input file (e.g., os.Stdin) providing ANSI sequence translation.
 type ansiReader struct {
-	file     *os.File
-	fd       uintptr
-	buffer   []byte
-	cbBuffer int
-	command  []byte
+	file    *os.File
+	fd      uintptr
+	buffer  []byte
+	command []byte
 }
 
 // NewAnsiReader returns an io.ReadCloser that provides VT100 terminal emulation on top of a
@@ -181,9 +180,10 @@ func keyToString(keyEvent *winterm.KEY_EVENT_RECORD, escapeSequence []byte) stri
 	if keyEvent.UnicodeChar == 0 {
 		return formatVirtualKey(keyEvent.VirtualKeyCode, keyEvent.ControlKeyState, escapeSequence)
 	}
-
+	key := string(rune(keyEvent.UnicodeChar))
 	_, alt, control := getControlKeys(keyEvent.ControlKeyState)
-	if control {
+	switch {
+	case control && !alt:
 		// TODO(azlinux): Implement following control sequences
 		// <Ctrl>-D  Signals the end of input from the keyboard; also exits current shell.
 		// <Ctrl>-H  Deletes the first character to the left of the cursor. Also called the ERASE key.
@@ -191,14 +191,13 @@ func keyToString(keyEvent *winterm.KEY_EVENT_RECORD, escapeSequence []byte) stri
 		// <Ctrl>-S  Suspends printing on the screen (does not stop the program).
 		// <Ctrl>-U  Deletes all characters on the current line. Also called the KILL key.
 		// <Ctrl>-E  Quits current command and creates a core
+		return key
+	case !control && alt:
+		// <Alt>+Key generates ESC N Key
+		return ansiterm.KEY_ESC_N + strings.ToLower(key)
+	default:
+		return key
 	}
-
-	// <Alt>+Key generates ESC N Key
-	if !control && alt {
-		return ansiterm.KEY_ESC_N + strings.ToLower(string(rune(keyEvent.UnicodeChar)))
-	}
-
-	return string(rune(keyEvent.UnicodeChar))
 }
 
 // formatVirtualKey converts a virtual key (e.g., up arrow) into the appropriate ANSI string.

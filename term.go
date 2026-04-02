@@ -10,9 +10,8 @@ type Winsize struct {
 	Height uint16
 	Width  uint16
 
-	// Only used on Unix
-	x uint16
-	y uint16
+	x uint16 //nolint:unused // only used on Unix
+	y uint16 //nolint:unused // only used on Unix
 }
 
 // StdStreams returns the standard streams (stdin, stdout, stderr).
