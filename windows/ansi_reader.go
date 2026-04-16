@@ -22,11 +22,10 @@ const (
 
 // ansiReader wraps a standard input file (e.g., os.Stdin) providing ANSI sequence translation.
 type ansiReader struct {
-	file     *os.File
-	fd       uintptr
-	buffer   []byte
-	cbBuffer int
-	command  []byte
+	file    *os.File
+	fd      uintptr
+	buffer  []byte
+	command []byte
 }
 
 // NewAnsiReader returns an io.ReadCloser that provides VT100 terminal emulation on top of a
@@ -99,11 +98,8 @@ func (ar *ansiReader) Read(p []byte) (int, error) {
 
 // readInputEvents polls until at least one event is available.
 func readInputEvents(ar *ansiReader, maxBytes int) ([]winterm.INPUT_RECORD, error) {
-	// Determine the maximum number of records to retrieve
-	// -- Cast around the type system to obtain the size of a single INPUT_RECORD.
-	//    unsafe.Sizeof requires an expression vs. a type-reference; the casting
-	//    tricks the type system into believing it has such an expression.
-	recordSize := int(unsafe.Sizeof(*((*winterm.INPUT_RECORD)(unsafe.Pointer(&maxBytes)))))
+	// Determine the size of a single INPUT_RECORD.
+	recordSize := int(unsafe.Sizeof(winterm.INPUT_RECORD{}))
 	countRecords := maxBytes / recordSize
 	if countRecords > ansiterm.MAX_INPUT_EVENTS {
 		countRecords = ansiterm.MAX_INPUT_EVENTS
@@ -167,9 +163,10 @@ var keyMapPrefix = map[uint16]string{
 // translateKeyEvents converts the input events into the appropriate ANSI string.
 func translateKeyEvents(events []winterm.INPUT_RECORD, escapeSequence []byte) []byte {
 	var buffer bytes.Buffer
-	for _, event := range events {
+	for i := range events {
+		event := events[i]
 		if event.EventType == winterm.KEY_EVENT && event.KeyEvent.KeyDown != 0 {
-			buffer.WriteString(keyToString(&event.KeyEvent, escapeSequence))
+			buffer.WriteString(keyToString(&events[i].KeyEvent, escapeSequence))
 		}
 	}
 
@@ -181,9 +178,10 @@ func keyToString(keyEvent *winterm.KEY_EVENT_RECORD, escapeSequence []byte) stri
 	if keyEvent.UnicodeChar == 0 {
 		return formatVirtualKey(keyEvent.VirtualKeyCode, keyEvent.ControlKeyState, escapeSequence)
 	}
-
+	key := string(rune(keyEvent.UnicodeChar))
 	_, alt, control := getControlKeys(keyEvent.ControlKeyState)
-	if control {
+	switch {
+	case control && !alt:
 		// TODO(azlinux): Implement following control sequences
 		// <Ctrl>-D  Signals the end of input from the keyboard; also exits current shell.
 		// <Ctrl>-H  Deletes the first character to the left of the cursor. Also called the ERASE key.
@@ -191,14 +189,13 @@ func keyToString(keyEvent *winterm.KEY_EVENT_RECORD, escapeSequence []byte) stri
 		// <Ctrl>-S  Suspends printing on the screen (does not stop the program).
 		// <Ctrl>-U  Deletes all characters on the current line. Also called the KILL key.
 		// <Ctrl>-E  Quits current command and creates a core
+		return key
+	case !control && alt:
+		// <Alt>+Key generates ESC N Key
+		return ansiterm.KEY_ESC_N + strings.ToLower(key)
+	default:
+		return key
 	}
-
-	// <Alt>+Key generates ESC N Key
-	if !control && alt {
-		return ansiterm.KEY_ESC_N + strings.ToLower(string(rune(keyEvent.UnicodeChar)))
-	}
-
-	return string(rune(keyEvent.UnicodeChar))
 }
 
 // formatVirtualKey converts a virtual key (e.g., up arrow) into the appropriate ANSI string.
@@ -219,9 +216,9 @@ func formatVirtualKey(key uint16, controlState uint32, escapeSequence []byte) st
 
 // getControlKeys extracts the shift, alt, and ctrl key states.
 func getControlKeys(controlState uint32) (shift, alt, control bool) {
-	shift = 0 != (controlState & winterm.SHIFT_PRESSED)
-	alt = 0 != (controlState & (winterm.LEFT_ALT_PRESSED | winterm.RIGHT_ALT_PRESSED))
-	control = 0 != (controlState & (winterm.LEFT_CTRL_PRESSED | winterm.RIGHT_CTRL_PRESSED))
+	shift = controlState&winterm.SHIFT_PRESSED != 0
+	alt = controlState&(winterm.LEFT_ALT_PRESSED|winterm.RIGHT_ALT_PRESSED) != 0
+	control = controlState&(winterm.LEFT_CTRL_PRESSED|winterm.RIGHT_CTRL_PRESSED) != 0
 	return shift, alt, control
 }
 

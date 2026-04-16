@@ -6,6 +6,7 @@ package term
 import (
 	"errors"
 	"io"
+	"math"
 	"os"
 
 	"golang.org/x/sys/unix"
@@ -31,12 +32,18 @@ func getFdInfo(in interface{}) (uintptr, bool) {
 }
 
 func getWinsize(fd uintptr) (*Winsize, error) {
+	if fd > math.MaxInt {
+		return nil, errors.New("invalid file descriptor")
+	}
 	uws, err := unix.IoctlGetWinsize(int(fd), unix.TIOCGWINSZ)
 	ws := &Winsize{Height: uws.Row, Width: uws.Col, x: uws.Xpixel, y: uws.Ypixel}
 	return ws, err
 }
 
 func setWinsize(fd uintptr, ws *Winsize) error {
+	if fd > math.MaxInt {
+		return errors.New("invalid file descriptor")
+	}
 	return unix.IoctlSetWinsize(int(fd), unix.TIOCSWINSZ, &unix.Winsize{
 		Row:    ws.Height,
 		Col:    ws.Width,
@@ -81,6 +88,9 @@ func setRawTerminalOutput(uintptr) (*State, error) {
 }
 
 func tcget(fd uintptr) (*unix.Termios, error) {
+	if fd > math.MaxInt {
+		return nil, errors.New("invalid file descriptor")
+	}
 	p, err := unix.IoctlGetTermios(int(fd), getTermios)
 	if err != nil {
 		return nil, err
@@ -89,5 +99,8 @@ func tcget(fd uintptr) (*unix.Termios, error) {
 }
 
 func tcset(fd uintptr, p *unix.Termios) error {
+	if fd > math.MaxInt {
+		return errors.New("invalid file descriptor")
+	}
 	return unix.IoctlSetTermios(int(fd), setTermios, p)
 }
