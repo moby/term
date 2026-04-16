@@ -32,7 +32,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Test
-      run: go test -v ./...
+      run: cd test && go test -v .
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -49,4 +49,10 @@ jobs:
           docker run --rm \
             -v ./:/go/src/github.com/moby/term \
             -w /go/src/github.com/moby/term \
+            golangci/golangci-lint:v2.11-alpine golangci-lint run -v
+      - name: Lint tests
+        run: |
+          docker run --rm \
+            -v ./:/go/src/github.com/moby/term \
+            -w /go/src/github.com/moby/term/test \
             golangci/golangci-lint:v2.11-alpine golangci-lint run -v

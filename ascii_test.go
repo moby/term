@@ -1,12 +1,14 @@
-package term
+package term_test
 
 import (
 	"bytes"
 	"testing"
+
+	"github.com/moby/term"
 )
 
 func TestToBytes(t *testing.T) {
-	codes, err := ToBytes("ctrl-a,a")
+	codes, err := term.ToBytes("ctrl-a,a")
 	if err != nil {
 		t.Error(err)
 	}
@@ -15,12 +17,12 @@ func TestToBytes(t *testing.T) {
 		t.Errorf("expected: %+v, got: %+v", expected, codes)
 	}
 
-	_, err = ToBytes("shift-z")
+	_, err = term.ToBytes("shift-z")
 	if err == nil {
 		t.Error("expected and error")
 	}
 
-	codes, err = ToBytes("ctrl-@,ctrl-[,~,ctrl-o")
+	codes, err = term.ToBytes("ctrl-@,ctrl-[,~,ctrl-o")
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,7 +31,7 @@ func TestToBytes(t *testing.T) {
 		t.Errorf("expected: %+v, got: %+v", expected, codes)
 	}
 
-	codes, err = ToBytes("DEL,+")
+	codes, err = term.ToBytes("DEL,+")
 	if err != nil {
 		t.Error(err)
 	}
