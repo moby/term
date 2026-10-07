@@ -1,5 +1,4 @@
 //go:build !windows
-// +build !windows
 
 package term
 
@@ -21,7 +20,7 @@ func stdStreams() (stdIn io.ReadCloser, stdOut, stdErr io.Writer) {
 	return os.Stdin, os.Stdout, os.Stderr
 }
 
-func getFdInfo(in interface{}) (uintptr, bool) {
+func getFdInfo(in any) (uintptr, bool) {
 	var inFd uintptr
 	var isTerminalIn bool
 	if file, ok := in.(*os.File); ok {

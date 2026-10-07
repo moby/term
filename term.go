@@ -24,7 +24,7 @@ func StdStreams() (stdIn io.ReadCloser, stdOut, stdErr io.Writer) {
 }
 
 // GetFdInfo returns the file descriptor for an os.File and indicates whether the file represents a terminal.
-func GetFdInfo(in interface{}) (fd uintptr, isTerminal bool) {
+func GetFdInfo(in any) (fd uintptr, isTerminal bool) {
 	return getFdInfo(in)
 }
 
