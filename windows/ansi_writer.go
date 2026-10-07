@@ -15,7 +15,6 @@ import (
 type ansiWriter struct {
 	file           *os.File
 	fd             uintptr
-	infoReset      *winterm.CONSOLE_SCREEN_BUFFER_INFO
 	command        []byte
 	escapeSequence []byte
 	parser         *ansiterm.AnsiParser
@@ -25,20 +24,17 @@ type ansiWriter struct {
 // Windows console output handle.
 func NewAnsiWriter(nFile int) io.Writer {
 	file, fd := winterm.GetStdFile(nFile)
-	info, err := winterm.GetConsoleScreenBufferInfo(fd)
-	if err != nil {
+	handler := winterm.CreateWinEventHandler(fd, file)
+	if handler == nil {
 		return nil
 	}
-
-	parser := ansiterm.CreateParser("Ground", winterm.CreateWinEventHandler(fd, file))
 
 	return &ansiWriter{
 		file:           file,
 		fd:             fd,
-		infoReset:      info,
 		command:        make([]byte, 0, ansiterm.ANSI_MAX_CMD_LENGTH),
 		escapeSequence: []byte(ansiterm.KEY_ESC_CSI),
-		parser:         parser,
+		parser:         ansiterm.CreateParser("Ground", handler),
 	}
 }
 
