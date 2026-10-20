@@ -23,8 +23,20 @@ func StdStreams() (stdIn io.ReadCloser, stdOut, stdErr io.Writer) {
 	return stdStreams()
 }
 
-// GetFdInfo returns the file descriptor for an os.File and indicates whether the file represents a terminal.
-func GetFdInfo(in any) (fd uintptr, isTerminal bool) {
+// terminalInfo provides the file descriptor and terminal status of a stream.
+// It matches the relevant methods of github.com/docker/cli/cli/streams.Out.
+type terminalInfo interface {
+	FD() uintptr
+	IsTerminal() bool
+}
+
+// GetFdInfo returns the file descriptor and terminal status of the given stream.
+// It supports *os.File and streams that provide their own file descriptor and
+// terminal status.
+func GetFdInfo(in any) (uintptr, bool) {
+	if t, ok := in.(terminalInfo); ok {
+		return t.FD(), t.IsTerminal()
+	}
 	return getFdInfo(in)
 }
 

@@ -83,22 +83,63 @@ func TestSetWinsize(t *testing.T) {
 	}
 }
 
+type testTerminalInfo struct {
+	fd         uintptr
+	isTerminal bool
+}
+
+func (t testTerminalInfo) FD() uintptr {
+	return t.fd
+}
+
+func (t testTerminalInfo) IsTerminal() bool {
+	return t.isTerminal
+}
+
 func TestGetFdInfo(t *testing.T) {
 	tty := newTTYForTest(t)
-	inFd, isTerm := GetFdInfo(tty)
-	if inFd != tty.Fd() {
-		t.Errorf("expected: %d, got: %d", tty.Fd(), inFd)
-	}
-	if !isTerm {
-		t.Error("expected file-descriptor to be a terminal")
-	}
 	tmpFile := newTempFile(t)
-	inFd, isTerm = GetFdInfo(tmpFile)
-	if inFd != tmpFile.Fd() {
-		t.Errorf("expected: %d, got: %d", tty.Fd(), inFd)
-	}
-	if isTerm {
-		t.Error("expected file-descriptor to not be a terminal")
+
+	for _, tc := range []struct {
+		name       string
+		stream     any
+		wantFD     uintptr
+		wantIsTerm bool
+	}{
+		{
+			name:       "tty",
+			stream:     tty,
+			wantFD:     tty.Fd(),
+			wantIsTerm: true,
+		},
+		{
+			name:       "file",
+			stream:     tmpFile,
+			wantFD:     tmpFile.Fd(),
+			wantIsTerm: false,
+		},
+		// Stream wrappers, such as docker/cli's streams.Out, provide their
+		// own terminal status. Use a TTY descriptor to verify that the
+		// reported status takes precedence over OS-level detection.
+		{
+			name:       "stream terminal",
+			stream:     testTerminalInfo{fd: tty.Fd(), isTerminal: true},
+			wantFD:     tty.Fd(),
+			wantIsTerm: true,
+		},
+		{
+			name:       "stream non-terminal",
+			stream:     testTerminalInfo{fd: tty.Fd(), isTerminal: false},
+			wantFD:     tty.Fd(),
+			wantIsTerm: false,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fd, isTerm := GetFdInfo(tc.stream)
+			if fd != tc.wantFD || isTerm != tc.wantIsTerm {
+				t.Errorf("GetFdInfo() = (%d, %t), want (%d, %t)", fd, isTerm, tc.wantFD, tc.wantIsTerm)
+			}
+		})
 	}
 }
 
