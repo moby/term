@@ -15,12 +15,11 @@ func newTTYForTest(t *testing.T) *os.File {
 	pty, tty, err := cpty.Open()
 	if err != nil {
 		t.Fatalf("error creating pty: %v", err)
-	} else {
-		t.Cleanup(func() {
-			_ = pty.Close()
-			_ = tty.Close()
-		})
 	}
+	t.Cleanup(func() {
+		_ = pty.Close()
+		_ = tty.Close()
+	})
 
 	return pty
 }
@@ -30,9 +29,8 @@ func newTempFile(t *testing.T) *os.File {
 	tmpFile, err := os.CreateTemp(t.TempDir(), "temp")
 	if err != nil {
 		t.Fatalf("error creating tempfile: %v", err)
-	} else {
-		t.Cleanup(func() { _ = tmpFile.Close() })
 	}
+	t.Cleanup(func() { _ = tmpFile.Close() })
 	return tmpFile
 }
 
@@ -46,7 +44,7 @@ func TestGetWinsize(t *testing.T) {
 		t.Fatal("winSize is nil")
 	}
 
-	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
+	newSize := Winsize{Width: 200, Height: 200}
 	err = SetWinsize(tty.Fd(), &newSize)
 	if err != nil {
 		t.Fatal(err)
@@ -69,7 +67,7 @@ func TestSetWinsize(t *testing.T) {
 	if winSize == nil {
 		t.Fatal("winSize is nil")
 	}
-	newSize := Winsize{Width: 200, Height: 200, x: winSize.x, y: winSize.y}
+	newSize := Winsize{Width: 200, Height: 200}
 	err = SetWinsize(tty.Fd(), &newSize)
 	if err != nil {
 		t.Fatal(err)
