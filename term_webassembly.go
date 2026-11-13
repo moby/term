@@ -36,11 +36,7 @@ func getWinsize(fd uintptr) (*Winsize, error) {
 }
 
 func setWinsize(fd uintptr, ws *Winsize) error {
-	window := js.Global().Get("window")
-	window.Set("innerWidth", ws.Width)
-	window.Set("innerHeight", ws.Height)
-
-	return nil
+	return errUnsupported
 }
 
 func isTerminal(fd uintptr) bool {
