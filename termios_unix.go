@@ -1,4 +1,4 @@
-//go:build !js && !windows
+//go:build !js && !wasip1 && !windows
 
 package term
 

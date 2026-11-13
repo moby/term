@@ -1,4 +1,4 @@
-//go:build !darwin && !freebsd && !netbsd && !openbsd && !js && !windows
+//go:build !darwin && !freebsd && !js && !netbsd && !openbsd && !wasip1 && !windows
 
 package term
 
