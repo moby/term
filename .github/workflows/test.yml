@@ -33,6 +33,16 @@ jobs:
         go-version: ${{ matrix.go }}
     - name: Test
       run: go test -v ./...
+    - name: Cross-compile
+      # One host OS suffices to cross-compile for all targets.
+      if: runner.os == 'Linux'
+      env:
+        CGO_ENABLED: "0"
+      run: |
+        for target in $(go tool dist list); do
+          echo "# building for $target"
+          GOOS=${target%/*} GOARCH=${target#*/} go build ./...
+        done
   lint:
     runs-on: ubuntu-latest
     steps:
